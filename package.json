@@ -1,0 +1,13 @@
+{
+  "name": "xLang",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "dev": "node index.js"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2"
+  }
+}
