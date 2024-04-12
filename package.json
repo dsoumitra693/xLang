@@ -5,9 +5,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "dev": "node index.js"
-  },
-  "devDependencies": {
-    "ts-node": "^10.9.2"
+    "dev": "node index.js",
+    "run-xs": "node xLang.js"
   }
 }

@@ -1,13 +1,17 @@
 import fs from "fs";
 
-let keywords = [
-  "le",
-  "bol",
-  "jodi",
-  "noyto",
-  "jotokhon",
-];
-let boolean = ["Ha", "Na"];
+export const keywords = {
+  DECLEARATION: "le",
+  PRINT: "bol",
+  IF: "jodi",
+  ELSE: "noyto",
+  WHILE: "jotokhon",
+};
+
+export const boolean = {
+  TRUE: "sotti",
+  FASLE: "mitta",
+};
 
 function lexer(sourceCode) {
   let cursor = 0;
@@ -31,10 +35,10 @@ function lexer(sourceCode) {
         char = sourceCode[++cursor];
       }
 
-      if (keywords.includes(word)) {
+      if (Object.values(keywords).includes(word)) {
         tokens.push({ type: "keyword", value: word });
-      } else if (boolean.includes(word)) {
-        tokens.push({ type: "boolean", value: word === "Ha" });
+      } else if (Object.values(boolean).includes(word)) {
+        tokens.push({ type: "boolean", value: word === boolean.TRUE });
       } else {
         tokens.push({ type: "identifier", value: word });
       }
@@ -52,7 +56,16 @@ function lexer(sourceCode) {
       continue;
     }
 
-    if (/[\+\-\*\/=\!\<\>]/.test(char)) {
+    if (/[\+\-\*\/=\!\<\>\%]/.test(char)) {
+      if (char == "/" && sourceCode[1 + cursor] == "/") {
+        cursor += 2;
+        char = sourceCode[cursor];
+
+        while (char !== "\n") {
+          char = sourceCode[++cursor];
+        }
+        continue;
+      }
       tokens.push({ type: "operator", value: char });
       cursor++;
       continue;
@@ -67,12 +80,12 @@ function lexer(sourceCode) {
       cursor++;
       continue;
     }
-    if (char==="(") {
+    if (char === "(") {
       tokens.push({ type: "leftParen", value: char });
       cursor++;
       continue;
     }
-    if (char===")") {
+    if (char === ")") {
       tokens.push({ type: "rightParen", value: char });
       cursor++;
       continue;
@@ -104,11 +117,10 @@ function parser(tokens) {
 
   while (tokens.length > 0) {
     let token = tokens.shift();
-
     // end of block
     if (token.type === "rightBrace") break;
     // declaration
-    if (token.type === "keyword" && token.value === "le") {
+    if (token.type === "keyword" && token.value === keywords.DECLEARATION) {
       let declartion = {
         type: "Declartion",
         name: tokens.shift().value,
@@ -124,7 +136,7 @@ function parser(tokens) {
       ast.body.push(declartion);
     }
     // print
-    if (token.type === "keyword" && token.value === "bol") {
+    if (token.type === "keyword" && token.value === keywords.PRINT) {
       if (tokens[0].type === "leftParen") {
         tokens.shift();
         ast.body.push({
@@ -135,7 +147,7 @@ function parser(tokens) {
     }
 
     // if/else
-    if (token.type === "keyword" && token.value === "jodi") {
+    if (token.type === "keyword" && token.value === keywords.IF) {
       let statement = {
         type: "IfStatement",
         name: "if",
@@ -156,8 +168,7 @@ function parser(tokens) {
       }
 
       // check else block
-      if (tokens[0].type === "keyword" && tokens[0].value === "noyto") {
-        console.log("inside else");
+      if (tokens[0].type === "keyword" && tokens[0].value === keywords.ELSE) {
         tokens.shift();
         if (tokens[0].type === "leftBrace") {
           tokens.shift();
@@ -176,10 +187,10 @@ function parser(tokens) {
       });
     }
     //while loop
-    if (token.type === "keyword" && token.value === "jotokhon") {
+    if (token.type === "keyword" && token.value === keywords.WHILE) {
       let loop = {
         type: "WhileLoop",
-        name:"while",
+        name: "while",
         condition: false,
         body: [],
       };
@@ -230,7 +241,7 @@ function codeGen(node) {
     case "Print":
       return `console.log(${node.expression})`;
     default:
-      throw new Error("Invaild statement recived "+ node);
+      throw new Error("Invaild statement recived " + node);
   }
 }
 
@@ -239,16 +250,15 @@ function compiler(sourceCode, filename) {
   const ast = parser(tokens);
   const code = codeGen(ast);
 
-  let newFilename = filename.replace("x", "js");
+  let newFilename = filename.replace("xs", "js");
   fs.writeFile(newFilename, code, "utf8", (err) => {
     if (err) {
       console.error("Error writing to file:", err);
       return;
     }
     console.log("Compilation Successful.");
+    eval(code);
   });
-
-  eval(code);
 }
 
 export default compiler;

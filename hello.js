@@ -1,5 +1,5 @@
-let x = -0.3
-while(x<100){
+let x = 0
+while(x<10){
           x = x+1
 console.log(x)
         }
