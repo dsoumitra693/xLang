@@ -6,6 +6,8 @@ export const keywords = {
   IF: "jodi",
   ELSE: "noyto",
   WHILE: "jotokhon",
+  FUNCTION:"function",
+  RETURN:"return"
 };
 
 export const boolean = {
@@ -168,7 +170,7 @@ function parser(tokens) {
       }
 
       // check else block
-      if (tokens[0].type === "keyword" && tokens[0].value === keywords.ELSE) {
+      if (tokens[0]?.type === "keyword" && tokens[0]?.value === keywords.ELSE) {
         tokens.shift();
         if (tokens[0].type === "leftBrace") {
           tokens.shift();
@@ -229,11 +231,17 @@ function codeGen(node) {
     case "Assignment":
       return `${node.name} = ${node.value}`;
     case "IfStatement":
-      return `if(${node.condition}){
-        ${codeGen(node.body)}
-      } else {
-        ${codeGen(node.elseBlock)}
-      }`;
+        if(!!node.elseBlock.length){
+          return `if(${node.condition}){
+            ${codeGen(node.body)}
+          } else {
+            ${codeGen(node.elseBlock)}
+          }`;
+        }else{
+          return `if(${node.condition}){
+            ${codeGen(node.body)}
+          }`;
+        }
     case "WhileLoop":
       return `while(${node.condition}){
           ${codeGen(node.body)}
@@ -247,6 +255,7 @@ function codeGen(node) {
 
 function compiler(sourceCode, filename) {
   const tokens = lexer(sourceCode);
+  console.log(tokens)
   const ast = parser(tokens);
   const code = codeGen(ast);
 
