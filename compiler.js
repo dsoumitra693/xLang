@@ -6,8 +6,8 @@ export const keywords = {
   IF: "jodi",
   ELSE: "noyto",
   WHILE: "jotokhon",
-  FUNCTION: "function",
-  RETURN: "return",
+  FUNCTION: "kaj",
+  RETURN: "ferot",
 };
 
 export const boolean = {
