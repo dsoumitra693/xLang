@@ -6,8 +6,8 @@ export const keywords = {
   IF: "jodi",
   ELSE: "noyto",
   WHILE: "jotokhon",
-  FUNCTION:"function",
-  RETURN:"return"
+  FUNCTION: "function",
+  RETURN: "return",
 };
 
 export const boolean = {
@@ -107,6 +107,11 @@ function lexer(sourceCode) {
       cursor++;
       continue;
     }
+    if (/,/.test(char)) {
+      tokens.push({ type: "comma", value: char });
+      cursor++;
+      continue;
+    }
   }
   return tokens;
 }
@@ -143,7 +148,7 @@ function parser(tokens) {
         tokens.shift();
         ast.body.push({
           type: "Print",
-          expression: createExpression(tokens, "rightParen"),
+          expression: createExpression(tokens, "eol"),
         });
       }
     }
@@ -209,6 +214,52 @@ function parser(tokens) {
 
       ast.body.push(loop);
     }
+    //function
+    if (token.type === "keyword" && token.value === keywords.FUNCTION) {
+      let func = {
+        type: "Function",
+        name: "",
+        args: [],
+        body: [],
+      };
+
+      if (tokens[0].type === "identifier") {
+        func.name = tokens[0].value;
+        tokens.shift();
+      }
+
+      if (tokens[0].type === "leftParen") {
+        tokens.shift();
+        let temp = "";
+        while (tokens[0].type !== "rightParen") {
+          let tkn = tokens.shift();
+          if (tkn.type === "comma" || tkn.type === "identifier")
+            temp += tkn.value;
+        }
+
+        func.args = temp.split(",");
+      }
+      tokens.shift();
+      if (tokens[0].type === "leftBrace") {
+        tokens.shift();
+        func.body = parser(tokens);
+      }
+
+      console.log(func);
+      ast.body.push(func);
+    }
+
+    //return
+    if (token.type === "keyword" && token.value === keywords.RETURN) {
+      let returnSmt = {
+        type: "Return",
+        name: "return",
+        returnObj: "",
+      };
+
+      returnSmt.returnObj = createExpression(tokens, "eol");
+      ast.body.push(returnSmt);
+    }
   }
 
   return ast;
@@ -231,23 +282,29 @@ function codeGen(node) {
     case "Assignment":
       return `${node.name} = ${node.value}`;
     case "IfStatement":
-        if(!!node.elseBlock.length){
-          return `if(${node.condition}){
+      if (!!node.elseBlock.length) {
+        return `if(${node.condition}){
             ${codeGen(node.body)}
           } else {
             ${codeGen(node.elseBlock)}
           }`;
-        }else{
-          return `if(${node.condition}){
+      } else {
+        return `if(${node.condition}){
             ${codeGen(node.body)}
           }`;
-        }
+      }
     case "WhileLoop":
       return `while(${node.condition}){
           ${codeGen(node.body)}
         }`;
+    case "Function":
+      return `function ${node.name}(${node.args}){
+              ${codeGen(node.body)}
+            }`;
+    case "Return":
+      return `return ${node.returnObj}`;
     case "Print":
-      return `console.log(${node.expression})`;
+      return `console.log(${node.expression}`;
     default:
       throw new Error("Invaild statement recived " + node);
   }
@@ -255,8 +312,8 @@ function codeGen(node) {
 
 function compiler(sourceCode, filename) {
   const tokens = lexer(sourceCode);
-  console.log(tokens)
   const ast = parser(tokens);
+  console.log(ast);
   const code = codeGen(ast);
 
   let newFilename = filename.replace("xs", "js");
