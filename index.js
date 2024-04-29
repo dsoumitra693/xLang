@@ -1,8 +1,7 @@
 import fs from "fs";
-import compiler from "./compiler.js";
+import compiler from "./src/complier.js";
 
-// Get the filename from command line arguments
-const args = process.argv.slice(2); // The first two arguments are node and the script file name
+const args = process.argv.slice(2);
 const filename = args[0];
 
 if (!filename) {
