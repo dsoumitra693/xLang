@@ -245,7 +245,6 @@ function parser(tokens) {
         func.body = parser(tokens);
       }
 
-      console.log(func);
       ast.body.push(func);
     }
 
@@ -313,7 +312,6 @@ function codeGen(node) {
 function compiler(sourceCode, filename) {
   const tokens = lexer(sourceCode);
   const ast = parser(tokens);
-  console.log(ast);
   const code = codeGen(ast);
 
   let newFilename = filename.replace("xs", "js");
