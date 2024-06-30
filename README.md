@@ -124,7 +124,7 @@ bol(result);
 
    ```bash
    git clone https://github.com/dsoumitra693/xLang.git
-   cd your-repo
+   cd xLang
    ```
 
 2. Compile your code:
