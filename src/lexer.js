@@ -78,14 +78,14 @@ export default function lexer(sourceCode) {
         continue;
       }
   
-      if (/"/.test(char)) {
+      if (/"\'/.test(char)) {
         let str = "";
         char = sourceCode[++cursor];
-        while (char && char !== '"') {
+        while (char && char !== '"' || char !== `'`) {
           str += char;
           char = sourceCode[++cursor];
         }
-        if (char !== '"') {
+        if (char !== '"' || char !== `'`) {
           throw new Error("Unterminated string literal");
         }
         tokens.push({ type: "string", value: `"${str}"` });
